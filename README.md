@@ -116,7 +116,7 @@ Planned improvements include:
 | Voice commands (speech input)  | In progress, not active yet  |
 | Ollama intent classification   | Working                      |
 | Keyword-router fallback        | Working                      |
-- Phone presence detection on the local network
+- Phone presence detection on the local network (Going to be added in future Updates)
 - Speech-to-text input
 - A more polished NOVA persona
 - Expanded Windows support for more applications and system controls
