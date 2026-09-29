@@ -29,8 +29,6 @@ The project is currently optimized for Linux, supports typed commands with spoke
 │   └── router.py           # Keyword-based fallback routing
 ├── skills/
 │   └── system_skills.py    # System and utility skills
-├── PRD.md                  # Product requirements and roadmap
-└── PROGRESS.md             # Development notes
 ```
 
 ## Requirements
@@ -97,12 +95,27 @@ NOVA can start applications and execute system actions, so only run it in an env
 
 Some features are platform-specific. Linux screenshots rely on Flameshot and Linux stealth mode uses `wmctrl`, `ptyxis`, and `cmatrix`. Windows screenshots use PowerShell and .NET screen APIs, so no extra Python imaging package is required.
 
+> **First run:** the first command can take 1–2 minutes while Ollama starts and loads
+> `llama3.2:3b` into memory (the first `ollama pull` also downloads about 2 GB).
+> Later commands are much faster. If Ollama isn't ready in time, NOVA falls back
+> to keyword routing.
+
 ## Roadmap
 
 Planned improvements include:
 
 - More reliable volume and sensor handling
 - Additional web and network skills
+
+## Current Status
+
+| Capability                     | Status                       |
+| ------------------------------ | ---------------------------- |
+| Typed commands                 | Working                      |
+| Spoken responses (`pyttsx3`)   | Working                      |
+| Voice commands (speech input)  | In progress, not active yet  |
+| Ollama intent classification   | Working                      |
+| Keyword-router fallback        | Working                      |
 - Phone presence detection on the local network
 - Speech-to-text input
 - A more polished NOVA persona
