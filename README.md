@@ -18,6 +18,18 @@ The project is currently optimized for Linux, supports typed commands with spoke
 - Launch common applications on Linux and Windows
 - Lock Linux with `loginctl` or Windows with `LockWorkStation`
 
+## New Features
+
+- **Floating Avatar UI** – Frameless, translucent window that stays on top.  Drag‑and‑drop movement works on Wayland and X11.
+- **Chat Pop‑over** – Click the avatar to toggle a sleek, glass‑morphism chat bubble with auto‑scrolling log and input field.
+- **Dynamic Web Browser Skill** – accepts any URL, parses domains, and falls back to a Google search when no direct match is found.
+- **Conversational Chat Engine** – dual‑mode intent routing: skill‑based actions first, then free‑form chat via Ollama.  Includes a system persona, conversation memory, and offline fallback messages.
+- **Retained Async Workers** – `IntentWorker` and `VoiceInputWorker` continue to run in background threads without UI stutter.
+- **Improved Drag Handling** – Uses `windowHandle().startSystemMove()` for reliable movement on Wayland.
+
+---
+
+
 ## Project structure
 
 ```text
@@ -35,7 +47,6 @@ The project is currently optimized for Linux, supports typed commands with spoke
 
 - Python 3.10+
 - Linux is the primary supported platform; Windows support covers the core system skills
-- `pyttsx3` and a system speech engine such as `espeak-ng` for spoken output
 - Optional: Ollama running locally with the configured model
 - Linux system tools used by individual skills may include `flameshot`, `pactl`, `wmctrl`, `ptyxis`, and `cmatrix`
 - Windows screenshot support uses built-in PowerShell, Windows volume controls use media keys, and application launching uses native executables
