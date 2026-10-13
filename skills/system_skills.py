@@ -1,4 +1,5 @@
 import os
+import re
 from core.registry import skill
 import platform
 import subprocess
@@ -50,6 +51,15 @@ def open_app(text):
             if word in applications:
                 subprocess.Popen([applications[word]], **_silent_process_options())
                 return f"Opening {word}..."
+
+        # If user used 'open <website>' (e.g. 'open huggingface.co', 'open twitch', 'open reddit'):
+        # Delegate seamlessly to web_brower
+        clean_text = text.lower().strip()
+        has_domain = any(tld in clean_text for tld in [".com", ".org", ".net", ".io", ".co", ".tv", ".ai", ".in", ".dev", "http://", "https://"])
+        is_known_site = any(site in clean_text.split() for site in sites)
+        if has_domain or is_known_site:
+            return web_brower(text)
+
         return f"No application found for '{text.strip()}'."
     except Exception as e:
         return f"Error opening application: {str(e)}"
@@ -178,17 +188,50 @@ sites = {
     "spotify": "https://open.spotify.com",
     "discord": "https://discord.com/app",
 }
-@skill("open_website", "open_web","openbrowser", "open_url","visit")
+@skill("open_website", "open_web", "openbrowser", "open_url", "visit", "browse", "website")
 def web_brower(url):
     try:
-        for word in url.split():
-            word = word.lower()
-            if word in sites:
-                webbrowser.open(sites[word])
-                return f"Opening {word}..."
-        return f"No website found for '{url.strip()}'."
+        clean_input = url.strip()
+
+        # Strip common leading trigger words if query came via keyword router
+        for trigger in ("open_website", "open_web", "openbrowser", "open_url", "visit", "browse", "website", "open"):
+            if clean_input.lower().startswith(trigger + " "):
+                clean_input = clean_input[len(trigger):].strip()
+
+        # 1. Check known shortcuts dictionary
+        for word in clean_input.lower().split():
+            clean_word = word.strip(".,;:?!'\"")
+            if clean_word in sites:
+                webbrowser.open(sites[clean_word])
+                return f"Opening {clean_word}..."
+
+        # 2. Check full http:// or https:// URLs
+        if clean_input.startswith("http://") or clean_input.startswith("https://"):
+            webbrowser.open(clean_input)
+            return f"Opening {clean_input}..."
+
+        # 3. Check for domain patterns (e.g. huggingface.co, stackoverflow.com, twitch.tv, python.org)
+        domain_match = re.search(r'\b([a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:/[^\s]*)?)\b', clean_input)
+        if domain_match:
+            target_url = f"https://{domain_match.group(1)}"
+            webbrowser.open(target_url)
+            return f"Opening {domain_match.group(1)}..."
+
+        # 4. Single-word site name fallback (e.g. 'twitch', 'huggingface', 'duckduckgo')
+        tokens = clean_input.split()
+        if len(tokens) == 1:
+            site_name = tokens[0].strip(".,;:?!'\"")
+            target_url = f"https://www.{site_name}.com"
+            webbrowser.open(target_url)
+            return f"Opening {site_name}.com..."
+
+        # 5. Multi-word search query fallback (e.g. 'search for quantum computing')
+        query = "+".join(tokens)
+        webbrowser.open(f"https://www.google.com/search?q={query}")
+        return f"Searching the web for '{clean_input}'..."
+
     except Exception as e:
-        return "Couldn't open the Website"
+        return f"Couldn't open the website: {str(e)}"
     
     
 @skill("mute", "unmute", "increase_volume", "decrease_volume")
@@ -399,3 +442,16 @@ def cow_message(text):
 @skill("compliment", "encourage", "motivate")
 def compliment(text):
     return "You are doing better than your error messages suggest. Keep going."
+
+
+@skill("chat", "talk", "ask", "hello", "hi", "hey")
+def chat_skill(text):
+    from core.intent import generate_chat_reply
+    # Clean leading trigger word if query came through router
+    clean = text.strip()
+    for trigger in ["chat", "talk", "ask", "hello", "hi", "hey"]:
+        if clean.lower().startswith(trigger + " "):
+            clean = clean[len(trigger):].strip()
+            break
+    return generate_chat_reply(clean if clean else text)
+
